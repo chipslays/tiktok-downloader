@@ -24,19 +24,37 @@ class TikTok
     private function getVideoWithWatermark()
     {
         $html = $this->get($this->url);
-        preg_match_all('/"contentUrl":"(.+?)"/', $html, $matches);
-        return $matches[1][0];
+        preg_match_all('/{"props"(.+?)<\/script>/', $html, $matches);
+        $data = '{"props"' . $matches[1][0];
+        $data = json_decode($data, true);
+
+        // полная структура: https://pastebin.com/9fi0QRPf
+        $res['user']['verified'] = $data['props']['pageProps']['videoData']['authorInfos']['verified'];
+        $res['user']['username'] = $data['props']['pageProps']['videoData']['authorInfos']['uniqueId'];
+        $res['user']['name'] = $data['props']['pageProps']['videoData']['authorInfos']['nickName'];
+        $res['user']['avatar'] = $data['props']['pageProps']['videoData']['authorInfos']['covers'][0];
+
+        $res['user']['stats']['followers'] = $data['props']['pageProps']['videoData']['authorStats']['followerCount'];
+        $res['user']['stats']['likes'] = $data['props']['pageProps']['videoData']['authorStats']['heartCount'];
+
+        $res['music']['title'] = $data['props']['pageProps']['videoData']['musicInfos']['musicName'];
+        $res['music']['author'] = $data['props']['pageProps']['videoData']['musicInfos']['authorName'];
+        $res['music']['cover'] = $data['props']['pageProps']['videoData']['musicInfos']['covers'][0];
+
+        $res['video']['cover'] = $data['props']['pageProps']['videoData']['itemInfos']['covers'][0];
+        $res['video']['links']['raw'] = $data['props']['pageProps']['videoData']['itemInfos']['video']['urls'][0];
+        $res['video']['meta'] = $data['props']['pageProps']['videoData']['itemInfos']['video']['videoMeta'];
+        $res['video']['text'] = $data['props']['pageProps']['videoData']['itemInfos']['text'];
+
+        return $res;
     }
 
     public function getData()
     {
-        $videoWithWatermark = $this->getVideoWithWatermark();
-        $videoWithOutWatermark = $this->getVideoWithOutWatermark($videoWithWatermark);
+        $res = $this->getVideoWithWatermark();
+        $res['video']['links']['clean'] = $this->getVideoWithOutWatermark($res['video']['links']['raw']);
 
-        return [
-            'videoWithWatermark' => $videoWithWatermark,
-            'videoWithOutWatermark' => $videoWithOutWatermark,
-        ];
+        return $res;
     }
 
     private function get($url)
