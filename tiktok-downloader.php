@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Simple TikTok video downloader (without watermark)
+ *
+ * @package TikTok
+ * @version 1.0.1
+ * @author  Aethletic <hello@botify.ru>
+ * @see 	https://github.com/aethletic/tiktok-downloader
+ */
 class TikTok
 {
     public $url;
