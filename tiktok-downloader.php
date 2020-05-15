@@ -6,7 +6,7 @@
  * @package TikTok
  * @version 1.0.1
  * @author  Aethletic <hello@botify.ru>
- * @see 	https://github.com/aethletic/tiktok-downloader
+ * @see     https://github.com/aethletic/tiktok-downloader
  */
 class TikTok
 {
