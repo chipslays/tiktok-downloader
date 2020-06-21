@@ -4,7 +4,7 @@
  * Simple TikTok video downloader (without watermark)
  *
  * @package TikTok
- * @version 1.0.1
+ * @version 1.0.2
  * @author  Aethletic <hello@botify.ru>
  * @see     https://github.com/aethletic/tiktok-downloader
  */
@@ -17,7 +17,8 @@ class TikTok
         $this->url = $url;
     }
 
-    public function url($url) {
+    public function url($url)
+    {
         $this->url = $url;
         return $this;
     }
@@ -41,7 +42,7 @@ class TikTok
         $data = '{"props"' . $matches[1][0];
         $data = json_decode($data, true);
 
-        // полная структура: https://pastebin.com/9fi0QRPf
+        // full params: https://pastebin.com/9fi0QRPf
         $res['user']['verified'] = $data['props']['pageProps']['videoData']['authorInfos']['verified'];
         $res['user']['username'] = $data['props']['pageProps']['videoData']['authorInfos']['uniqueId'];
         $res['user']['name'] = $data['props']['pageProps']['videoData']['authorInfos']['nickName'];
@@ -54,7 +55,13 @@ class TikTok
         $res['music']['author'] = $data['props']['pageProps']['videoData']['musicInfos']['authorName'];
         $res['music']['cover'] = $data['props']['pageProps']['videoData']['musicInfos']['covers'][0];
         $res['music']['page'] = $data['props']['pageProps']['videoObjectPageProps']['videoProps']['audio']['mainEntityOfPage']['@id'];
-        $res['music']['link'] = $this->getAudioLink($res['music']['page']);
+
+        // Previously, the link was accessible by the key playUrl,
+        // now it has been removed and done differently.
+        // I have neither the time nor the desire to figure out
+        // how to get the link now. If you want, you can make a Pull Request.
+        // $res['music']['link'] = $this->getAudioLink($res['music']['page']);
+        $res['music']['link'] = null;
 
         $res['video']['cover'] = $data['props']['pageProps']['videoData']['itemInfos']['covers'][0];
         $res['video']['links']['raw'] = $data['props']['pageProps']['videoData']['itemInfos']['video']['urls'][0];
@@ -70,6 +77,7 @@ class TikTok
         preg_match_all('/{"props"(.+?)<\/script>/', $html, $matches);
         $data = '{"props"' . $matches[1][0];
         $data = json_decode($data, true);
+
         return $data['props']['pageProps']['musicInfo']['music']['playUrl'];
     }
 
@@ -89,7 +97,7 @@ class TikTok
             return false;
         }
 
-        $res['video']['links']['clean'] = preg_replace('/[\x00-\x1F\x7F]/u', '',$this->getVideoWithOutWatermark($res['video']['links']['raw']));
+        $res['video']['links']['clean'] = preg_replace('/[\x00-\x1F\x7F]/u', '', $this->getVideoWithOutWatermark($res['video']['links']['raw']));
 
         return $res;
     }
@@ -115,5 +123,4 @@ class TikTok
         curl_close($curl);
         return $response;
     }
-}
 }
