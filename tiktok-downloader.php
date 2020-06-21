@@ -33,6 +33,11 @@ class TikTok
     {
         $html = $this->get($this->url);
         preg_match_all('/{"props"(.+?)<\/script>/', $html, $matches);
+
+        if (sizeof($matches[1]) == 0) {
+            return false;
+        }
+
         $data = '{"props"' . $matches[1][0];
         $data = json_decode($data, true);
 
@@ -48,6 +53,8 @@ class TikTok
         $res['music']['title'] = $data['props']['pageProps']['videoData']['musicInfos']['musicName'];
         $res['music']['author'] = $data['props']['pageProps']['videoData']['musicInfos']['authorName'];
         $res['music']['cover'] = $data['props']['pageProps']['videoData']['musicInfos']['covers'][0];
+        $res['music']['page'] = $data['props']['pageProps']['videoObjectPageProps']['videoProps']['audio']['mainEntityOfPage']['@id'];
+        $res['music']['link'] = $this->getAudioLink($res['music']['page']);
 
         $res['video']['cover'] = $data['props']['pageProps']['videoData']['itemInfos']['covers'][0];
         $res['video']['links']['raw'] = $data['props']['pageProps']['videoData']['itemInfos']['video']['urls'][0];
@@ -57,10 +64,32 @@ class TikTok
         return $res;
     }
 
+    private function getAudioLink($url)
+    {
+        $html = $this->get($url);
+        preg_match_all('/{"props"(.+?)<\/script>/', $html, $matches);
+        $data = '{"props"' . $matches[1][0];
+        $data = json_decode($data, true);
+        return $data['props']['pageProps']['musicInfo']['music']['playUrl'];
+    }
+
     public function getData()
     {
+        if ($this->url == '') {
+            return false;
+        }
+
         $res = $this->getVideoWithWatermark();
-        $res['video']['links']['clean'] = $this->getVideoWithOutWatermark($res['video']['links']['raw']);
+
+        if (!$res) {
+            return false;
+        }
+
+        if ($res['video']['links']['raw'] == '') {
+            return false;
+        }
+
+        $res['video']['links']['clean'] = preg_replace('/[\x00-\x1F\x7F]/u', '',$this->getVideoWithOutWatermark($res['video']['links']['raw']));
 
         return $res;
     }
@@ -86,4 +115,5 @@ class TikTok
         curl_close($curl);
         return $response;
     }
+}
 }
