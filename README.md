@@ -1,5 +1,5 @@
 # tiktok-downloader
-PHP Download TikTok audio, video without watermark or with watermark. 
+PHP Download TikTok video without watermark or with watermark. 
 
 ## Example
 ```php
