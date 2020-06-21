@@ -3,7 +3,10 @@ PHP Download TikTok video without watermark or with watermark.
 
 ## Example
 ```php
+require '/tiktok-download.php';
+
 $res = (new TikTok())->url('https://vm.tiktok.com/3Ejte5/')->getData();
+
 print_r($res);
 ```
 
