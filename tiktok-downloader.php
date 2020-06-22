@@ -4,13 +4,14 @@
  * Simple TikTok video downloader (without watermark)
  *
  * @package TikTok
- * @version 1.0.2
+ * @version 1.0.4
  * @author  Aethletic <hello@botify.ru>
  * @see     https://github.com/aethletic/tiktok-downloader
  */
 class TikTok
 {
     public $url;
+    private $useragent = '';
 
     public function __construct($url = null)
     {
@@ -101,6 +102,17 @@ class TikTok
 
         return $res;
     }
+    
+    public function setUseragent($useragent = false)
+    {
+    	if (!$useragent) {
+    		return;
+    	}
+    	
+    	$this->useragent = $useragent;
+    	
+    	return $this;
+    }
 
     private function get($url)
     {
@@ -115,7 +127,7 @@ class TikTok
           CURLOPT_FOLLOWLOCATION => true,
           CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
           CURLOPT_CUSTOMREQUEST => "GET",
-          CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240',
+          CURLOPT_USERAGENT => $this->useragent,
         ));
 
         $response = curl_exec($curl);
@@ -124,3 +136,5 @@ class TikTok
         return $response;
     }
 }
+
+
